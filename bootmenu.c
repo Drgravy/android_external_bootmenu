@@ -454,50 +454,23 @@ static int run_bootmenu(void) {
  *
  */
 int main(int argc, char **argv) {
+  char* executable = argv[0];
   int result;
 
-  if (NULL != strstr(executable, "hijack")) {
-    //when ln -s bootmenu hijack, we can use busybox cmd
-    if (argc >= 2) {
-      return busybox_driver(argc - 1, argv + 1);
-    }
-    fprintf(stdout, "use hijack [cmds of busybox].\n");
-    return 0;
-  }	
-  
-  
   if (argc == 2 && 0 == strcmp(argv[1], "postbootmenu")) {
-
-    /* init.rc call: "exec bootmenu postbootmenu" */
-
     exec_script(FILE_OVERCLOCK, DISABLE);
     result = exec_script(FILE_POST_MENU, DISABLE);
     bypass_sign("no");
     sync();
     return result;
   }
-  else if (NULL != strstr(argv[0], "bootmenu")) {
-
-    /* Direct UI, without key test */
-
-#ifndef UNLOCKED_DEVICE
+  else if (NULL != strstr(executable, "bootmenu")) {
     fprintf(stdout, "Run BootMenu..\n");
-    exec_script(FILE_PRE_MENU, DISABLE);
-    int mode = get_bootmode(0,0);
-    result = run_bootmenu_ui(mode);
-#else
-    // unlocked devices can exec bootmenu directly in init.rc
     result = run_bootmenu();
-    bypass_sign("no");
-#endif
-
     sync();
     return result;
   }
   else if (argc >= 3 && 0 == strcmp(argv[2], "userdata")) {
-
-    /* init.rc call: "exec logwrapper mount.sh userdata" */
-
     result = run_bootmenu();
     real_execute(argc, argv);
     bypass_sign("no");
@@ -505,9 +478,7 @@ int main(int argc, char **argv) {
     return result;
   }
   else if (argc >= 3 && 0 == strcmp(argv[2], "pds")) {
-
-    /* kept for stock rom compatibility, please use postbootmenu parameter */
-
+    //kept for stock rom compatibility, please use postbootmenu
     real_execute(argc, argv);
     exec_script(FILE_OVERCLOCK, DISABLE);
     result = exec_script(FILE_POST_MENU, DISABLE);
@@ -518,7 +489,5 @@ int main(int argc, char **argv) {
   else {
     return real_execute(argc, argv);
   }
-
-  return 0;
 }
 

@@ -46,7 +46,6 @@
 
 #define NUM_BUFFERS 2
 
-#include "font_10x18.h"
 #include "minui.h"
 #include "font_10x18.h"
 #include "roboto_15x24.h"
